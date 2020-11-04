@@ -1,60 +1,32 @@
+import os
 import random
 
-prime_list = []
-prime_limit = 500
+def get_bytes_length(val: int) -> int:
+	x, r = divmod(val.bit_length(), 8)
+	if r:
+		return x+1
+	else:
+		return x
 
-def _init_(): # generate prime numbers
-	global prime_list
+def get_random_bytes(nbytes: int) -> bytes:
+	# Get the random bytes
+	random_bytes = os.urandom(nbytes)
 	
-	isPrime = [True] * prime_limit
+	return random_bytes
 
-	for num in range(2,prime_limit):
-		if isPrime[num]:
-			prime_list.append(num)
-			for t_num in range(num, prime_limit, num):
-				isPrime[t_num] = False
+def get_random_int(nbytes: int) -> int:
+	random_bytes = get_random_bytes(nbytes)
+	random_int = int.from_bytes(random_bytes, 'big')
 
-def get_gcm(a, b): # 최대공약수 구하기
-	# 유클리드 호제법을 사용함.
-	num = max(a,b)
-	div = min(a,b)
+	# Ensure that the number is large enough to just fill out the required
+	# number of bits.
+	# ex) nbytes = 1
+	# random_int = 00011010
+	# 00011010 | 10000000  =>  10011010
+	random_int |= 1 << (int(nbytes/8) - 1)
 
-	while (num % div) != 0:
-		remain = num % div
-		num = div
-		div = remain
-	return div
+def get_random_odd_int(nbytes: int) -> int:
+	random_int = get_random_int(nbytes)
 
-def mod_exp(num, exp, div):
-	x = 1
-	pow = num % div
-
-	while exp > 0:
-		if exp % 2 == 1:
-			x = (x*pow) % div
-		pow = (pow*pow) % div	
-		exp >>= 1
-
-	return x
-		
-
-def get_random_prime(limit):
-	global prime_list
-	limit_idx = 0
-	while limit_idx < len(prime_list):
-		if prime_list[limit_idx] >= limit:
-			break
-		limit_idx+=1
-
-	return prime_list[random.randrange(limit_idx)]
-
-def get_random_coprime(val, limit): # 임의의 서로소 구하기
-	coprime_list = []
-
-	for num in range(2, limit):
-		if get_gcm(val, num) == 1:
-			coprime_list.append(num)
-
-	return random.choice(coprime_list)
-
-_init_()
+	# Make sure it's odd
+	return random_int | 1
