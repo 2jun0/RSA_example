@@ -95,7 +95,7 @@ def get_random_prime(nbytes: int) -> int:
       # If not, retry
 
 def get_random_coprime(val, limit, iter_max = 10000): # 임의의 서로소 구하기
-  for _ in range(iter_max = 10000):
+  for _ in range(iter_max):
     num = random.randint(limit)
     if gcd(val, num) == 1:
       return num
